@@ -4,6 +4,8 @@
 
 ## 使用
 
+[例子](https://github.com/lhlyu/kratos-layout)
+
 - 获取依赖
 
 ```

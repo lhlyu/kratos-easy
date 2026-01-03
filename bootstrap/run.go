@@ -22,6 +22,12 @@ func Run[T any](cfg T, run runner[T], opts ...Option) {
 			WithFilterLevel(log.LevelDebug),
 		)
 	}
+	if constants.IsDevelopment() {
+		opts = append(
+			opts,
+			WithFilterLevel(log.LevelDebug),
+		)
+	}
 
 	logger := newLogger(opts...)
 

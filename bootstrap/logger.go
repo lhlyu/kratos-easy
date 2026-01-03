@@ -22,6 +22,7 @@ type options struct {
 	format      string
 	timeLayout  string
 	enableTrace bool
+	enableSpan  bool
 	setGlobal   bool
 }
 
@@ -61,10 +62,17 @@ func WithTimeLayout(layout string) Option {
 	}
 }
 
-// WithDisableTrace 禁用链路追踪
+// WithDisableTrace 禁用链路追踪 trace_id
 func WithDisableTrace() Option {
 	return func(o *options) {
 		o.enableTrace = false
+	}
+}
+
+// WithEnableSpan 启用链路追踪 span_id
+func WithEnableSpan() Option {
+	return func(o *options) {
+		o.enableSpan = true
 	}
 }
 
@@ -84,6 +92,7 @@ func newLogger(opts ...Option) log.Logger {
 		format:      "console",
 		timeLayout:  time.DateTime,
 		enableTrace: true,
+		enableSpan:  false,
 		setGlobal:   true,
 	}
 	for _, opt := range opts {
@@ -114,9 +123,16 @@ func newLogger(opts ...Option) log.Logger {
 	if o.enableTrace {
 		kvs = append(kvs,
 			"trace_id", tracing.TraceID(),
+		)
+	}
+
+	if o.enableSpan {
+		kvs = append(kvs,
 			"span_id", tracing.SpanID(),
 		)
+	}
 
+	if o.enableTrace || o.enableSpan {
 		// 启用链路追踪
 		tp := trace.NewTracerProvider()
 		otel.SetTracerProvider(tp)
