@@ -1,11 +1,15 @@
 package bootstrap
 
 import (
+	"os"
 	"time"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/lhlyu/kratos-easy/constants"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 // runner 定义了 main 函数中 wire 注入的逻辑
@@ -29,7 +33,28 @@ func Run[T any](cfg T, run runner[T], opts ...Option) {
 		)
 	}
 
-	logger := newLogger(opts...)
+	// 默认配置
+	o := &options{
+		writer:      os.Stdout,
+		level:       log.LevelInfo,
+		format:      "console",
+		timeLayout:  time.DateTime,
+		enableTrace: true,
+		enableSpan:  false,
+		setGlobal:   true,
+	}
+	for _, opt := range opts {
+		opt(o)
+	}
+
+	if o.enableTrace || o.enableSpan {
+		// 启用链路追踪
+		tp := trace.NewTracerProvider()
+		otel.SetTracerProvider(tp)
+		otel.SetTextMapPropagator(propagation.TraceContext{})
+	}
+
+	logger := newLogger(o)
 
 	// 加载配置到传入的泛型结构体
 	if err := loadConfig(cfg); err != nil {
