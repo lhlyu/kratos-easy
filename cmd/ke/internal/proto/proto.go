@@ -23,16 +23,16 @@ type proto struct {
 }
 
 // newProto 根据 API 名称构建 proto 对象
-func newProto(name string) *proto {
+func newProto(name, version string) *proto {
 	name = strings.ToLower(name)
 
-	dir := filepath.Join("api", name, "v1")
+	dir := filepath.Join("api", name, version)
 
 	return &proto{
 		Name:        name,
 		Dir:         dir,
 		File:        name + ".proto",
-		Package:     name + ".v1",
+		Package:     "api." + name + "." + version,
 		Service:     toUpperCamelCase(name),
 		GoPackage:   goPackage(dir),
 		JavaPackage: name,
@@ -60,7 +60,7 @@ func (p *proto) Generate() error {
 
 	// 防止覆盖已有文件
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("文件已存在：%s", path)
+		return fmt.Errorf("file already exists：%s", path)
 	}
 
 	if err := os.WriteFile(path, body, 0o644); err != nil {
