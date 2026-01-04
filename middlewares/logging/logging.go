@@ -10,9 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/lhlyu/kratos-easy/utilx"
-	"go.opentelemetry.io/otel/trace"
 )
 
 /************************
@@ -91,18 +89,6 @@ func loggingMiddleware(
 				operation     string
 				e             string
 			)
-
-			traceId := ""
-
-			if span := trace.SpanContextFromContext(ctx); span.HasTraceID() {
-				traceId = span.TraceID().String()
-			}
-
-			if info, ok := transport.FromServerContext(ctx); ok {
-				transportType = info.Kind().String()
-				operation = info.Operation()
-				info.ReplyHeader().Set("x-trace-id", traceId)
-			}
 
 			// 记录请求日志
 			helper.Log(
