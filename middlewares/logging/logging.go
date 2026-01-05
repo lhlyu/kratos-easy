@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/go-kratos/kratos/v2/transport"
 	"github.com/lhlyu/kratos-easy/utilx"
 )
 
@@ -89,6 +90,11 @@ func loggingMiddleware(
 				operation     string
 				e             string
 			)
+
+			if info, ok := transport.FromServerContext(ctx); ok {
+				transportType = info.Kind().String()
+				operation = info.Operation()
+			}
 
 			// 记录请求日志
 			helper.Log(
