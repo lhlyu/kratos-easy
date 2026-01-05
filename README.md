@@ -141,6 +141,22 @@ func EncodeError(w http.ResponseWriter, r *http.Request, err error)
 
 ### 4. middlewares - 中间件
 
+#### header - 管理 HTTP 响应头的中间件
+
+```go
+// 管理 HTTP 响应头中间件
+func Header(opts ...Option) middleware.Middleware
+
+// 自定义 Request ID 的 Header 名
+func WithRequestIdHeader(name string) Option
+
+// 禁用 Request Id 响应头
+func DisableRequestId() Option
+
+// WithStaticHeader 添加一个静态响应头
+func WithStaticHeader(key, value string) Option
+```
+
 #### logging - 日志中间件
 
 ```go
