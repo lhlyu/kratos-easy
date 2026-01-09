@@ -2,19 +2,34 @@ package bootstrap
 
 import (
 	"io"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
 
-// options 配置选项
+// options 配置选项，用于初始化日志与配置加载
 type options struct {
-	writer      io.Writer
-	level       log.Level
-	format      string
-	timeLayout  string
-	enableTrace bool
-	enableSpan  bool
-	setGlobal   bool
+	writer      io.Writer // 日志输出目标，默认 os.Stdout
+	level       log.Level // 日志等级过滤，低于该等级的日志不会输出，默认 LevelInfo
+	format      string    // 日志输出格式，可选 "console" 或 "json"，默认 "console"
+	timeLayout  string    // 日志时间格式，默认 time.DateTime
+	enableTrace bool      // 是否输出链路追踪 trace_id，默认开启
+	enableSpan  bool      // 是否输出链路追踪 span_id，默认关闭
+	setGlobal   bool      // 是否覆盖全局默认日志器，默认 true
+	configDir   string    // 配置文件目录路径，默认 "configs"
+}
+
+var globalOption = &options{
+	writer:      os.Stdout,
+	level:       log.LevelInfo,
+	format:      "console",
+	timeLayout:  time.DateTime,
+	enableTrace: true,
+	enableSpan:  false,
+	setGlobal:   true,
+	configDir:   "configs",
 }
 
 type Option func(*options)
@@ -72,5 +87,12 @@ func WithEnableSpan() Option {
 func WithDisableGlobal() Option {
 	return func(o *options) {
 		o.setGlobal = false
+	}
+}
+
+// WithConfigDir 设置配置文件的目录路径
+func WithConfigDir(elem ...string) Option {
+	return func(o *options) {
+		o.configDir = filepath.Join(elem...)
 	}
 }

@@ -1,7 +1,6 @@
 package bootstrap
 
 import (
-	"os"
 	"time"
 
 	"github.com/go-kratos/kratos/v2"
@@ -33,28 +32,18 @@ func Run[T any](cfg T, run runner[T], opts ...Option) {
 		)
 	}
 
-	// 默认配置
-	o := &options{
-		writer:      os.Stdout,
-		level:       log.LevelInfo,
-		format:      "console",
-		timeLayout:  time.DateTime,
-		enableTrace: true,
-		enableSpan:  false,
-		setGlobal:   true,
-	}
 	for _, opt := range opts {
-		opt(o)
+		opt(globalOption)
 	}
 
-	if o.enableTrace || o.enableSpan {
+	if globalOption.enableTrace || globalOption.enableSpan {
 		// 启用链路追踪
 		tp := trace.NewTracerProvider()
 		otel.SetTracerProvider(tp)
 		otel.SetTextMapPropagator(propagation.TraceContext{})
 	}
 
-	logger := newLogger(o)
+	logger := newLogger()
 
 	// 加载配置到传入的泛型结构体
 	if err := loadConfig(cfg); err != nil {

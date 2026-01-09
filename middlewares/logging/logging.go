@@ -70,6 +70,11 @@ func Client(logger log.Logger, opts ...Option) middleware.Middleware {
 	return loggingMiddleware(logger, "client", newOptions(opts...))
 }
 
+var transports = map[string]func(ctx context.Context) (tr transport.Transporter, ok bool){
+	"server": transport.FromServerContext,
+	"client": transport.FromClientContext,
+}
+
 /************************
  * Middleware
  ************************/
@@ -91,9 +96,11 @@ func loggingMiddleware(
 				e             string
 			)
 
-			if info, ok := transport.FromServerContext(ctx); ok {
-				transportType = info.Kind().String()
-				operation = info.Operation()
+			if h, ok := transports[transportType]; ok {
+				if info, ok := h(ctx); ok {
+					transportType = info.Kind().String()
+					operation = info.Operation()
+				}
 			}
 
 			// 记录请求日志
@@ -111,21 +118,25 @@ func loggingMiddleware(
 				e = "⟦" + se.Error() + "⟧"
 			}
 
-			level := log.LevelInfo
-			if err != nil {
-				level = log.LevelError
-			}
+			kvs := make([]any, 0, 10)
 
-			// 记录响应日志
-			helper.Log(
-				level,
+			kvs = append(kvs,
 				"kind", kind,
 				"transport", transportType,
 				"operation", operation,
 				"resp", extractArgs(reply, opt),
-				"err", e,
-				"latency", time.Since(start).String(),
 			)
+
+			level := log.LevelInfo
+			if err != nil {
+				level = log.LevelError
+				kvs = append(kvs, "err", e)
+			}
+
+			kvs = append(kvs, "latency", time.Since(start).String())
+
+			// 记录响应日志
+			helper.Log(level, kvs...)
 
 			return reply, err
 		}

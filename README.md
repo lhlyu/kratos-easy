@@ -19,6 +19,9 @@ go get -u github.com/lhlyu/kratos-easy@latest
 #### 核心函数
 
 ```go
+// Init 初始化，只执行一次
+func Init(opts ...Option)
+
 // 执行通用的启动流程
 func Run[T any](cfg T, run runner[T], opts ...Option)
 

@@ -23,7 +23,7 @@ type proto struct {
 }
 
 // newProto 根据 API 名称构建 proto 对象
-func newProto(name, version string) *proto {
+func newProto(name, version, protoName string) *proto {
 	name = strings.ToLower(name)
 
 	dir := filepath.Join("api", name, version)
@@ -31,11 +31,11 @@ func newProto(name, version string) *proto {
 	return &proto{
 		Name:        name,
 		Dir:         dir,
-		File:        name + ".proto",
+		File:        protoName + ".proto",
 		Package:     "api." + name + "." + version,
-		Service:     toUpperCamelCase(name),
+		Service:     toUpperCamelCase(protoName),
 		GoPackage:   goPackage(dir),
-		JavaPackage: name,
+		JavaPackage: protoName,
 	}
 }
 

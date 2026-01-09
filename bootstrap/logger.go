@@ -9,36 +9,36 @@ import (
 )
 
 // 新建日志
-func newLogger(o *options) log.Logger {
+func newLogger() log.Logger {
 
 	var baseLogger log.Logger
-	if o.format == "json" {
+	if globalOption.format == "json" {
 		encoderConfig := zap.NewProductionEncoderConfig()
-		encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(o.timeLayout)
+		encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(globalOption.timeLayout)
 		core := zapcore.NewCore(
 			zapcore.NewJSONEncoder(encoderConfig),
-			zapcore.AddSync(o.writer),
+			zapcore.AddSync(globalOption.writer),
 			zap.DebugLevel,
 		)
 		baseLogger = kratoszap.NewLogger(zap.New(core))
 	} else {
-		baseLogger = log.NewStdLogger(o.writer)
+		baseLogger = log.NewStdLogger(globalOption.writer)
 	}
 
-	filteredLogger := log.NewFilter(baseLogger, log.FilterLevel(o.level))
+	filteredLogger := log.NewFilter(baseLogger, log.FilterLevel(globalOption.level))
 
 	kvs := []any{
-		"ts", log.Timestamp(o.timeLayout),
+		"ts", log.Timestamp(globalOption.timeLayout),
 		"caller", log.DefaultCaller,
 	}
 
-	if o.enableTrace {
+	if globalOption.enableTrace {
 		kvs = append(kvs,
 			"trace_id", tracing.TraceID(),
 		)
 	}
 
-	if o.enableSpan {
+	if globalOption.enableSpan {
 		kvs = append(kvs,
 			"span_id", tracing.SpanID(),
 		)
@@ -49,7 +49,7 @@ func newLogger(o *options) log.Logger {
 		kvs...,
 	)
 
-	if o.setGlobal {
+	if globalOption.setGlobal {
 		log.SetLogger(logger)
 	}
 
