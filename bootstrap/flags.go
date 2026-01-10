@@ -8,6 +8,9 @@ import (
 
 var FlagConf string
 
+// ConfDir 配置文件所在的目录
+var ConfDir string
+
 // 默认配置文件优先级
 var defaultConfCandidates = []string{
 	"config.test.yaml",
@@ -37,4 +40,23 @@ func initFlags(root string) {
 		findDefaultConf(root),
 		"config path",
 	)
+	ConfDir, _ = getDirPath(FlagConf)
+}
+
+// getDirPath 根据传入路径返回目录路径
+// 如果 path 是目录，则直接返回
+// 如果 path 是文件，则返回文件所在目录
+func getDirPath(path string) (string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+
+	if info.IsDir() {
+		// 是目录，直接返回
+		return path, nil
+	}
+
+	// 是文件，返回它所在的目录
+	return filepath.Dir(path), nil
 }
