@@ -19,6 +19,9 @@ type options struct {
 	enableSpan  bool      // 是否输出链路追踪 span_id，默认关闭
 	setGlobal   bool      // 是否覆盖全局默认日志器，默认 true
 	configDir   string    // 配置文件目录路径，默认 "configs"
+	logDir      string    // 日志目录，默认 "logs"
+	logMaxDays  int       // 日志最大保留天数，默认 7 天
+	enableFile  bool      // 是否写入文件，默认 false
 }
 
 var globalOption = &options{
@@ -30,6 +33,9 @@ var globalOption = &options{
 	enableSpan:  false,
 	setGlobal:   true,
 	configDir:   "configs",
+	logDir:      "logs",
+	logMaxDays:  7,
+	enableFile:  false,
 }
 
 type Option func(*options)
@@ -94,5 +100,26 @@ func WithDisableGlobal() Option {
 func WithConfigDir(elem ...string) Option {
 	return func(o *options) {
 		o.configDir = filepath.Join(elem...)
+	}
+}
+
+// WithLogDir 设置日志目录
+func WithLogDir(dir string) Option {
+	return func(o *options) {
+		o.logDir = dir
+	}
+}
+
+// WithLogMaxDays 设置日志最大保留天数
+func WithLogMaxDays(days int) Option {
+	return func(o *options) {
+		o.logMaxDays = days
+	}
+}
+
+// WithEnableFileLog 启用文件日志输出
+func WithEnableFileLog() Option {
+	return func(o *options) {
+		o.enableFile = true
 	}
 }

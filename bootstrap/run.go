@@ -43,7 +43,8 @@ func Run[T any](cfg T, run runner[T], opts ...Option) {
 		otel.SetTextMapPropagator(propagation.TraceContext{})
 	}
 
-	logger := newLogger()
+	logger, loggerCleanup := newLogger()
+	defer loggerCleanup()
 
 	// 加载配置到传入的泛型结构体
 	if err := loadConfig(cfg); err != nil {

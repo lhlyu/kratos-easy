@@ -1,5 +1,7 @@
 package utilx
 
+import "iter"
+
 // Set 是一个通用的集合类型，支持任何可比较类型 T。
 // 内部基于 map[T]struct{} 实现，支持常用集合操作。
 type Set[T comparable] struct {
@@ -15,14 +17,18 @@ func NewSet[T comparable](items ...T) *Set[T] {
 	return s
 }
 
-// Add 向集合中添加元素。
-func (s *Set[T]) Add(item T) {
-	s.data[item] = struct{}{}
+// Add 向集合中添加一个或多个元素。
+func (s *Set[T]) Add(items ...T) {
+	for _, item := range items {
+		s.data[item] = struct{}{}
+	}
 }
 
-// Remove 从集合中删除元素。
-func (s *Set[T]) Remove(item T) {
-	delete(s.data, item)
+// Remove 从集合中删除一个或多个元素。
+func (s *Set[T]) Remove(items ...T) {
+	for _, item := range items {
+		delete(s.data, item)
+	}
 }
 
 // Contains 检查集合中是否存在元素。
@@ -36,6 +42,11 @@ func (s *Set[T]) Len() int {
 	return len(s.data)
 }
 
+// IsEmpty 判断集合是否为空。
+func (s *Set[T]) IsEmpty() bool {
+	return len(s.data) == 0
+}
+
 // Clear 清空集合。
 func (s *Set[T]) Clear() {
 	s.data = make(map[T]struct{})
@@ -46,6 +57,15 @@ func (s *Set[T]) ToSlice() []T {
 	result := make([]T, 0, len(s.data))
 	for k := range s.data {
 		result = append(result, k)
+	}
+	return result
+}
+
+// Clone 返回集合的一个副本。
+func (s *Set[T]) Clone() *Set[T] {
+	result := NewSet[T]()
+	for k := range s.data {
+		result.data[k] = struct{}{}
 	}
 	return result
 }
@@ -82,4 +102,16 @@ func (s *Set[T]) Difference(other *Set[T]) *Set[T] {
 		}
 	}
 	return result
+}
+
+// All 返回一个迭代器，用于遍历集合中的所有元素。
+// 支持 Go 1.23+ 的 range-over-func 特性。
+func (s *Set[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for k := range s.data {
+			if !yield(k) {
+				return
+			}
+		}
+	}
 }

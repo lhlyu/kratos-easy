@@ -64,6 +64,16 @@ func WithMaxIdleConns(n int) Option {
 	}
 }
 
+// WithCustomConfig 添加更多预设
+func WithCustomConfig(maxOpen, maxIdle int, lifetime, idleTime time.Duration) Option {
+	return func(o *options) {
+		o.maxOpen = maxOpen
+		o.maxIdleCount = maxIdle
+		o.maxLifetime = lifetime
+		o.maxIdleTime = idleTime
+	}
+}
+
 // WithSmallConfig 返回适用于小型服务的默认数据库配置。
 //
 // 适用场景：

@@ -34,6 +34,16 @@ func WithFriendlyMsg(fn func(err error) string) Option {
 	}
 }
 
+// WithDetailedMsg 提供更详细的错误信息选项
+func WithDetailedMsg() Option {
+	return func(o *Options) {
+		o.friendlyMsg = func(err error) string {
+			// 返回具体的字段验证错误
+			return err.Error()
+		}
+	}
+}
+
 // newOptions 初始化 Options。
 func newOptions(opts ...Option) *Options {
 	o := &Options{
