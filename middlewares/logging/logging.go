@@ -96,7 +96,7 @@ func loggingMiddleware(
 				e             string
 			)
 
-			if h, ok := transports[transportType]; ok {
+			if h, ok := transports[kind]; ok {
 				if info, ok := h(ctx); ok {
 					transportType = info.Kind().String()
 					operation = info.Operation()
