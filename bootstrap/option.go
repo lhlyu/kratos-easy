@@ -21,7 +21,7 @@ type options struct {
 	configDir   string    // 配置文件目录路径，默认 "configs"
 	logDir      string    // 日志目录，默认 "logs"
 	logMaxDays  int       // 日志最大保留天数，默认 7 天
-	enableFile  bool      // 是否写入文件，默认 false
+	enableFile  bool      // 是否写入文件，默认 true
 }
 
 var globalOption = &options{
@@ -35,7 +35,7 @@ var globalOption = &options{
 	configDir:   "configs",
 	logDir:      "logs",
 	logMaxDays:  7,
-	enableFile:  false,
+	enableFile:  true,
 }
 
 type Option func(*options)
@@ -117,9 +117,9 @@ func WithLogMaxDays(days int) Option {
 	}
 }
 
-// WithEnableFileLog 启用文件日志输出
-func WithEnableFileLog() Option {
+// WithDisableFileLog 禁用文件日志输出
+func WithDisableFileLog() Option {
 	return func(o *options) {
-		o.enableFile = true
+		o.enableFile = false
 	}
 }
