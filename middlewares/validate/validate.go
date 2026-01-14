@@ -67,12 +67,16 @@ func newOptions(opts ...Option) *Options {
 // 可通过 Option 自定义前端友好提示信息。
 func ProtoValidate(opts ...Option) middleware.Middleware {
 	o := newOptions(opts...)
+	v, err := protovalidate.New()
+	if err != nil {
+		panic(err)
+	}
 
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req any) (reply any, err error) {
 			// 验证 protovalidate 消息
 			if msg, ok := req.(proto.Message); ok {
-				if err := protovalidate.Validate(msg); err != nil {
+				if err := v.Validate(msg); err != nil {
 					return nil, handleErr(err, o)
 				}
 			}

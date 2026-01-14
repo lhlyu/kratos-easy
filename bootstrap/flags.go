@@ -32,6 +32,11 @@ func findDefaultConf(root string) string {
 	return filepath.Join(root, dir)
 }
 
+// updateConfDir 更新 ConfDir
+func updateConfDir() {
+	ConfDir, _ = getDirPath(FlagConf)
+}
+
 // initFlags 初始化 flag
 func initFlags(root string) {
 	flag.StringVar(
@@ -40,7 +45,7 @@ func initFlags(root string) {
 		findDefaultConf(root),
 		"config path",
 	)
-	ConfDir, _ = getDirPath(FlagConf)
+	updateConfDir()
 }
 
 // getDirPath 根据传入路径返回目录路径

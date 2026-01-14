@@ -98,45 +98,30 @@ func cleanOldLogs(dir string, maxDays int) {
 
 // newLogger 新建日志，返回 logger 和清理函数
 func newLogger() (log.Logger, func()) {
-
-	var core zapcore.Core
 	var fileWriter *dailyRotateWriter
+	var zLogger *zap.Logger
+	var kzLogger *kratoszap.Logger
 
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(globalOption.timeLayout)
+	// 基础日志器，默认输出到终端
+	baseLogger := log.NewStdLogger(globalOption.writer)
 
-	if !constants.IsLocal() {
-		// 非本地环境：默认只向终端(Console)写入，若开启了 enableFile 则同时写入文件(JSON)
+	// 非本地环境且开启了文件日志，则同时写入文件(JSON)
+	if !constants.IsLocal() && globalOption.enableFile {
+		// 1. 程序运行前检查并删除过期日志
+		cleanOldLogs(globalOption.logDir, globalOption.logMaxDays)
 
-		// 1. 终端打印采用 console 格式
-		consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
-		consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zap.DebugLevel)
+		// 2. 文件采用 JSON 格式，按日期分割
+		encoderConfig := zap.NewProductionEncoderConfig()
+		encoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(globalOption.timeLayout)
+		encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 
-		if globalOption.enableFile {
-			// 2. 程序运行前检查并删除过期日志
-			cleanOldLogs(globalOption.logDir, globalOption.logMaxDays)
+		fileWriter = &dailyRotateWriter{dir: globalOption.logDir}
+		fileCore := zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(fileWriter), zap.DebugLevel)
+		zLogger = zap.New(fileCore)
+		kzLogger = kratoszap.NewLogger(zLogger)
 
-			// 3. 文件采用 JSON 格式，按日期分割
-			fileWriter = &dailyRotateWriter{dir: globalOption.logDir}
-			fileCore := zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), zapcore.AddSync(fileWriter), zap.DebugLevel)
-
-			core = zapcore.NewTee(consoleCore, fileCore)
-		} else {
-			core = consoleCore
-		}
-	} else {
-		// 本地环境
-		var encoder zapcore.Encoder
-		if globalOption.format == "json" {
-			encoder = zapcore.NewJSONEncoder(encoderConfig)
-		} else {
-			// 终端默认采用 console 格式
-			encoder = zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
-		}
-		core = zapcore.NewCore(encoder, zapcore.AddSync(globalOption.writer), zap.DebugLevel)
+		baseLogger = MultiLogger(baseLogger, kzLogger)
 	}
-
-	baseLogger := kratoszap.NewLogger(zap.New(core))
 
 	filteredLogger := log.NewFilter(baseLogger, log.FilterLevel(globalOption.level))
 
@@ -168,10 +153,34 @@ func newLogger() (log.Logger, func()) {
 
 	// 返回清理函数
 	cleanup := func() {
+		if kzLogger != nil {
+			_ = kzLogger.Close()
+		}
+		if zLogger != nil {
+			_ = zLogger.Sync()
+		}
 		if fileWriter != nil {
 			_ = fileWriter.Close() // 关闭日志文件
 		}
 	}
 
 	return logger, cleanup
+}
+
+type multiLogger struct {
+	loggers []log.Logger
+}
+
+func (l *multiLogger) Log(level log.Level, keyvals ...any) error {
+	for _, logger := range l.loggers {
+		if err := logger.Log(level, keyvals...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// MultiLogger 组合多个日志器
+func MultiLogger(loggers ...log.Logger) log.Logger {
+	return &multiLogger{loggers: loggers}
 }

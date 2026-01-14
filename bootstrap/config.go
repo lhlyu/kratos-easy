@@ -1,19 +1,12 @@
 package bootstrap
 
 import (
-	"flag"
-
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/env"
 	"github.com/go-kratos/kratos/v2/config/file"
 )
 
 func loadConfig(bc any) error {
-
-	Init()
-
-	flag.Parse()
-
 	c := config.New(
 		config.WithSource(
 			env.NewSource(),

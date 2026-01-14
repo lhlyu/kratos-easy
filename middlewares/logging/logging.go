@@ -192,12 +192,19 @@ func guardByType(v any, max int) (string, bool) {
 
 // guardBySize 对字符串按最大长度进行裁剪。
 func guardBySize(s string, max int) string {
-	if len(s) <= max {
+	total := len(s)
+	if total <= max {
 		return s
 	}
+
+	r := []rune(s)
+	if len(r) > max {
+		s = string(r[:max])
+	}
+
 	return fmt.Sprintf(
 		"%s...<truncated, total=%d bytes>",
-		s[:max],
-		len(s),
+		s,
+		total,
 	)
 }

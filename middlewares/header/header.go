@@ -20,7 +20,7 @@ func Header(opts ...Option) middleware.Middleware {
 		return func(ctx context.Context, req any) (any, error) {
 			if info, ok := transport.FromServerContext(ctx); ok {
 				// 当前仅作用于 HTTP Server
-				if info.Kind().String() == "http" {
+				if info.Kind() == transport.KindHTTP {
 					applyHeaders(ctx, info, opt)
 				}
 			}

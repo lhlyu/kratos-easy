@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"flag"
 	"time"
 
 	"github.com/go-kratos/kratos/v2"
@@ -35,6 +36,13 @@ func Run[T any](cfg T, run runner[T], opts ...Option) {
 	for _, opt := range opts {
 		opt(globalOption)
 	}
+
+	Init()
+
+	if !flag.Parsed() {
+		flag.Parse()
+	}
+	updateConfDir()
 
 	if globalOption.enableTrace || globalOption.enableSpan {
 		// 启用链路追踪

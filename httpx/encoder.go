@@ -17,8 +17,7 @@ func EncodeResponse(w http.ResponseWriter, r *http.Request, v any) error {
 		return nil
 	}
 
-	codec, _ := http.CodecForRequest(r, "Accept")
-	w.Header().Set("Content-Type", "application/"+codec.Name()+"; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	return json.NewEncoder(w).Encode(response{
 		Code: 0,
@@ -33,8 +32,7 @@ func EncodeError(w http.ResponseWriter, r *http.Request, err error) {
 	if se == nil {
 		se = errors.New(errors.UnknownCode, errors.UnknownReason, "服务器异常")
 	}
-	codec, _ := http.CodecForRequest(r, "Accept")
-	w.Header().Set("Content-Type", "application/"+codec.Name()+"; charset=utf-8")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(int(se.Code))
 
 	_ = json.NewEncoder(w).Encode(response{
