@@ -12,7 +12,7 @@ import (
 // fn: 需要重试的函数，它返回一个 error
 func Retry(ctx context.Context, maxRetries int, delay time.Duration, fn func() error) error {
 	var lastErr error
-	for i := 0; i < maxRetries; i++ {
+	for i := range maxRetries {
 		// 在每次尝试前检查 context 是否已取消
 		select {
 		case <-ctx.Done():
