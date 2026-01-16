@@ -23,7 +23,7 @@ go get -u github.com/lhlyu/kratos-easy@latest
 func Init(opts ...Option)
 
 // 执行通用的启动流程
-func Run[T any](cfg T, run runner[T], opts ...Option)
+func Run[T any](cfg T, run runner[T])
 
 // 创建 Kratos 应用实例
 func NewApp(logger log.Logger, servers ...transport.Server) *kratos.App
@@ -71,6 +71,18 @@ func WithEnableSpan() Option
 
 // WithDisableGlobal 禁止覆盖全局的默认日志器
 func WithDisableGlobal() Option
+
+// WithConfigDir 设置配置文件的目录路径
+func WithConfigDir(elem ...string) Option
+
+// WithLogDir 设置日志目录
+func WithLogDir(dir string) Option
+
+// WithLogMaxDays 设置日志最大保留天数
+func WithLogMaxDays(days int) Option
+
+// WithDisableFileLog 禁用文件日志输出
+func WithDisableFileLog() Option
 ```
 
 ---
@@ -84,6 +96,14 @@ const AppEnv = "APP_ENV"
 const ProjectName = "PROJECT_NAME"
 const ProjectRef = "PROJECT_REF"
 const ProjectSha = "PROJECT_SHA"
+
+// AppEnv 的枚举值如下
+const (
+    EnvProduction  = "production"
+    EnvStaging     = "staging"
+    EnvDevelopment = "development"
+    EnvLocal       = "local"
+)
 ```
 
 #### 环境枚举值
@@ -280,6 +300,9 @@ func WithMediumConfig() Option
 
 // WithHighConcurrencyConfig 高并发默认配置
 func WithHighConcurrencyConfig() Option
+
+// WithFullCaller 启用打印详细的调用路径
+func WithFullCaller() Option
 ```
 
 ---
@@ -333,11 +356,17 @@ func (s *Set[T]) Contains(item T) bool
 // Len 返回集合中元素的数量
 func (s *Set[T]) Len() int
 
+// IsEmpty 判断集合是否为空。
+func (s *Set[T]) IsEmpty() bool
+
 // Clear 清空集合
 func (s *Set[T]) Clear()
 
 // ToSlice 将集合转换为切片
 func (s *Set[T]) ToSlice() []T
+
+// Clone 返回集合的一个副本。
+func (s *Set[T]) Clone() *Set[T]
 
 // Union 返回两个集合的并集
 func (s *Set[T]) Union(other *Set[T]) *Set[T]
@@ -347,6 +376,10 @@ func (s *Set[T]) Intersect(other *Set[T]) *Set[T]
 
 // Difference 返回集合 s 相对于 other 的差集
 func (s *Set[T]) Difference(other *Set[T]) *Set[T]
+
+// All 返回一个迭代器，用于遍历集合中的所有元素。
+// 支持 Go 1.23+ 的 range-over-func 特性。
+func (s *Set[T]) All() iter.Seq[T]
 ```
 
 #### time - 时间工具
@@ -371,6 +404,11 @@ func Process[T any](data []T, batchSize int, fn func([]T) error) error
 
 // 从切片中取前 maxLen 个元素
 func Take[T any](s []T, maxLen int) []T
+
+// Prepend 在切片 s 前面插入 elems，并返回新切片。
+// 不会修改原切片。
+// 当 elems 为空时，直接返回 s。
+func Prepend[T any](s []T, elems ...T) []T
 ```
 
 #### md5 - MD5 工具

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"strconv"
 	"time"
+	"unsafe"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -190,21 +192,26 @@ func guardByType(v any, max int) (string, bool) {
 	}
 }
 
-// guardBySize 对字符串按最大长度进行裁剪。
+const (
+	truncatedPrefix = "...<truncated, total="
+	truncatedSuffix = " bytes>"
+	truncatedFixed  = len(truncatedPrefix) + len(truncatedSuffix)
+)
+
+// guardBySize 对字符串按最大长度进行裁剪
 func guardBySize(s string, max int) string {
 	total := len(s)
 	if total <= max {
 		return s
 	}
 
-	r := []rune(s)
-	if len(r) > max {
-		s = string(r[:max])
-	}
+	n := max + truncatedFixed + total
 
-	return fmt.Sprintf(
-		"%s...<truncated, total=%d bytes>",
-		s,
-		total,
-	)
+	b := make([]byte, 0, n)
+	b = append(b, s[:max]...)
+	b = append(b, truncatedPrefix...)
+	b = strconv.AppendInt(b, int64(total), 10)
+	b = append(b, truncatedSuffix...)
+
+	return unsafe.String(&b[0], len(b))
 }

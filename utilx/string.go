@@ -30,8 +30,9 @@ func StringToBytes(s string) []byte {
 //   - 不要长期持有返回的 string
 //   - 不要在并发场景下修改 []byte
 func BytesToString(b []byte) string {
-	if len(b) == 0 {
+	l := len(b)
+	if l == 0 {
 		return ""
 	}
-	return unsafe.String(unsafe.SliceData(b), len(b))
+	return unsafe.String(unsafe.SliceData(b), l)
 }

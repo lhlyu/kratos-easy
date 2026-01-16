@@ -2,11 +2,9 @@ package bootstrap
 
 import (
 	"flag"
-	"time"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/lhlyu/kratos-easy/constants"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/trace"
@@ -17,25 +15,7 @@ import (
 type runner[T any] func(cfg T, logger log.Logger) (*kratos.App, func(), error)
 
 // Run 执行通用的启动流程
-func Run[T any](cfg T, run runner[T], opts ...Option) {
-
-	if constants.IsLocal() {
-		opts = append(
-			opts,
-			WithTimeLayout(time.TimeOnly),
-			WithFilterLevel(log.LevelDebug),
-		)
-	}
-	if constants.IsDevelopment() {
-		opts = append(
-			opts,
-			WithFilterLevel(log.LevelDebug),
-		)
-	}
-
-	for _, opt := range opts {
-		opt(globalOption)
-	}
+func Run[T any](cfg T, run runner[T]) {
 
 	Init()
 

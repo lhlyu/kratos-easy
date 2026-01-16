@@ -27,3 +27,22 @@ func Take[T any](s []T, maxLen int) []T {
 	}
 	return s[:maxLen]
 }
+
+// Prepend 在切片 s 前面插入 elems，并返回新切片。
+// 不会修改原切片。
+// 当 elems 为空时，直接返回 s。
+func Prepend[T any](s []T, elems ...T) []T {
+	if len(elems) == 0 {
+		return s
+	}
+
+	n := len(elems) + len(s)
+	out := make([]T, n)
+
+	// 拷贝前置元素
+	copy(out, elems)
+	// 拷贝原切片
+	copy(out[len(elems):], s)
+
+	return out
+}

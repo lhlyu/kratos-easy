@@ -1,9 +1,12 @@
 package bootstrap
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -141,6 +144,14 @@ func cleanOldLogs(dir string, maxDays int) {
 	}
 }
 
+// caller 打印详细的调用路径
+func caller(depth int) log.Valuer {
+	return func(context.Context) any {
+		_, file, line, _ := runtime.Caller(depth)
+		return file + ":" + strconv.Itoa(line)
+	}
+}
+
 // newLogger 新建日志，返回 logger 和清理函数
 func newLogger() (log.Logger, func()) {
 	var fileWriter *dailyRotateWriter
@@ -165,9 +176,14 @@ func newLogger() (log.Logger, func()) {
 
 	filteredLogger := log.NewFilter(baseLogger, log.FilterLevel(globalOption.level))
 
+	callerValuer := log.DefaultCaller
+	if globalOption.enableFullCaller {
+		callerValuer = caller(4)
+	}
+
 	kvs := []any{
 		"ts", log.Timestamp(globalOption.timeLayout),
-		"caller", log.DefaultCaller,
+		"caller", callerValuer,
 	}
 
 	if globalOption.enableTrace {
