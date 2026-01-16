@@ -382,7 +382,7 @@ func (s *Set[T]) Difference(other *Set[T]) *Set[T]
 func (s *Set[T]) All() iter.Seq[T]
 ```
 
-#### time - 时间工具
+#### time – 时间工具
 
 ```go
 // 返回当前时间戳（毫秒）
@@ -428,7 +428,7 @@ func Parallel(handlers ...func() error) error
 func ParallelSafe(handlers ...func())
 ```
 
-#### path - 路径工具
+#### path – 路径工具
 
 ```go
 // 找到项目根目录（查找 go.mod）
