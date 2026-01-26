@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -14,7 +13,7 @@ type options struct {
 	writer           io.Writer // 日志输出目标，默认 os.Stdout
 	level            log.Level // 日志等级过滤，低于该等级的日志不会输出，默认 LevelInfo
 	format           string    // 日志输出格式，可选 "console" 或 "json"，默认 "console"
-	timeLayout       string    // 日志时间格式，默认 time.DateTime
+	timeLayout       string    // 日志时间格式，默认 2006-01-02T15:04:05.000
 	enableTrace      bool      // 是否输出链路追踪 trace_id，默认开启
 	enableSpan       bool      // 是否输出链路追踪 span_id，默认关闭
 	setGlobal        bool      // 是否覆盖全局默认日志器，默认 true
@@ -29,7 +28,7 @@ var globalOption = &options{
 	writer:           os.Stdout,
 	level:            log.LevelInfo,
 	format:           "console",
-	timeLayout:       time.DateTime,
+	timeLayout:       "2006-01-02T15:04:05.000",
 	enableTrace:      true,
 	enableSpan:       false,
 	setGlobal:        true,
