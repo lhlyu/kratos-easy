@@ -1,6 +1,7 @@
 package utilx
 
 import (
+	"encoding/base64"
 	"unsafe"
 )
 
@@ -35,4 +36,26 @@ func BytesToString(b []byte) string {
 		return ""
 	}
 	return unsafe.String(unsafe.SliceData(b), l)
+}
+
+// Base64Encode 将字符串进行 base64 编码。
+func Base64Encode(val string) string {
+	if val == "" {
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(StringToBytes(val))
+}
+
+// Base64Decode 将 base64 字符串解码为原始字符串。
+//
+// 若输入为空字符串，则返回空字符串和 nil。
+func Base64Decode(val string) (string, error) {
+	if val == "" {
+		return "", nil
+	}
+	b, err := base64.StdEncoding.DecodeString(val)
+	if err != nil {
+		return "", err
+	}
+	return BytesToString(b), nil
 }

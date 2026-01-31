@@ -333,6 +333,12 @@ func StringToBytes(s string) []byte
 
 // []byte 转 string（零拷贝，只读）
 func BytesToString(b []byte) string
+
+// base64 编码
+func Base64Encode(val string) string
+
+// base64 解码
+func Base64Decode(val string) (string, error)
 ```
 
 #### set - 集合工具
@@ -437,4 +443,3 @@ func FindProjectRoot() string
 // 分隔符 + 任意基本类型变参
 func Join(sep string, vals ...any) string
 ```
-
